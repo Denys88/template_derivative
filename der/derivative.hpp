@@ -111,6 +111,21 @@ namespace tr {
         using Result = S<BinaryOperation<DIFF, RR, Div>>;
     };
     
+    template<class L, int E>
+    struct Der<BinaryOperation<L,IntConstant<E>, Exp>> {
+        using DL = S<D<L>>;
+        using EL = BinaryOperation<L,IntConstant<E-1>, Exp>;
+        using Result = S<BinaryOperation<IntConstant<E>, EL, Mul>>;
+    };
+    
+    template<class L, class R>
+    struct Der<BinaryOperation<L,R, Exp>> {
+        using LOGL = LogOperation<L>;
+        using M = BinaryOperation<LOGL,R, Mul>;
+        using DM = S<D<M>>;
+        using Result = BinaryOperation<DM, ExpOperation<M>, Mul>;
+    };
+    
     template<template<class> class UnOp, class E>
     struct Der<UnOp<E>> {
         using DE = S<D<E>>;

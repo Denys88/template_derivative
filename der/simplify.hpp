@@ -121,6 +121,16 @@ namespace tr {
         using Result = BinaryOperation<IntConstant<2>, S<LR>, Mul>;
     };
     
+    template<class L>
+    struct Simplify<BinaryOperation<L, OneConstant, Exp>> {
+        using Result = L;
+    };
+    
+    template<class L>
+    struct Simplify<BinaryOperation<L, ZeroConstant, Exp>> {
+        using Result = OneConstant;
+    };
+    
     /*template<class L1, class R1, class L2, class R2>
     struct Simplify<BinaryOperation<BinaryOperation<L1, R1, Add>, BinaryOperation<L2, R2, Add>, Mul>> {
         using L1L2 = BinaryOperation<L1, L2, Mul>;

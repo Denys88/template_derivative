@@ -59,6 +59,15 @@ namespace tr {
         }
     };
 
+    struct Exp {
+        inline static double apply(double a, double b) {
+            return pow(a, b);
+        }
+        inline static const char* name() {
+            return "^";
+        }
+    };
+    
     struct Sub {
         inline static double apply(double a, double b) {
             return a - b;
@@ -117,6 +126,11 @@ namespace tr {
     template<class L, class R>
     inline BinaryOperation<L,R, Div> operator/(const L& l, const R& r) {
         return BinaryOperation<L,R, Div>{l, r};
+    }
+    
+    template<class L, class R>
+    inline BinaryOperation<L,R, Exp> pow(const L& l, const R& r) {
+        return BinaryOperation<L,R, Exp>{l, r};
     }
     
     template <double(*func)(double) , class E>
