@@ -14,7 +14,7 @@ namespace tr {
     
     template <class E>
     using S = typename Simplify<E>::Result;
-    
+
     template<class L>
     struct Simplify<BinaryOperation<L, ZeroConstant, Add>> {
         using Result = S<L>;
@@ -29,6 +29,26 @@ namespace tr {
     struct Simplify<BinaryOperation<ZeroConstant, ZeroConstant, Add>> {
         using Result = ZeroConstant;
     };
+
+    template<class R>
+    struct Simplify<BinaryOperation<ZeroConstant, MinusOperation<R>, Add>> {
+        using Result = S<R>;
+    };
+
+    template<class L>
+    struct Simplify<BinaryOperation<L, ZeroConstant, Sub>> {
+        using Result = S<L>;
+    };
+    
+    template<class R>
+    struct Simplify<BinaryOperation<ZeroConstant, R, Sub>> {
+        using Result = S<MinusOperation<R>>;
+    };
+    
+    template<>
+    struct Simplify<BinaryOperation<ZeroConstant, ZeroConstant, Sub>> {
+        using Result = ZeroConstant;
+    };
     
     template<class L>
     struct Simplify<BinaryOperation<L, ZeroConstant, Mul>> {
@@ -37,6 +57,16 @@ namespace tr {
     
     template<class R>
     struct Simplify<BinaryOperation<ZeroConstant, R, Mul>> {
+        using Result = ZeroConstant;
+    };
+    
+    template<class R>
+    struct Simplify<BinaryOperation<ZeroConstant, MinusOperation<R>, Mul>> {
+        using Result = ZeroConstant;
+    };
+    
+    template<class L>
+    struct Simplify<BinaryOperation<MinusOperation<L>, ZeroConstant, Mul>> {
         using Result = ZeroConstant;
     };
     
@@ -90,10 +120,14 @@ namespace tr {
         using Result = MinusOperation<S<BinaryOperation<L, R, Mul>>>;
     };
 
-    
     template<class L, class R>
     struct Simplify<BinaryOperation<MinusOperation<L>, MinusOperation<R>, Mul>> {
         using Result = S<BinaryOperation<L, R, Mul>>;
+    };
+    
+    template<class L, class R, class Op>
+    struct Simplify<BinaryOperation<DoubleConstant<L>, DoubleConstant<R>, Op>> {
+        using Result = DoubleConstant<S<BinaryOperation<L, R, Op>>>;
     };
     
     template<class L, class R>
@@ -129,6 +163,11 @@ namespace tr {
     template<class L>
     struct Simplify<BinaryOperation<L, ZeroConstant, Exp>> {
         using Result = OneConstant;
+    };
+    
+    template<class L>
+    struct Simplify<BinaryOperation<ZeroConstant, L, Exp>> {
+        using Result = ZeroConstant;
     };
     
     /*template<class L1, class R1, class L2, class R2>

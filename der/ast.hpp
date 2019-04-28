@@ -7,17 +7,14 @@
 //
 #include <iostream>
 #include <math.h>
-
+#include <vector>
 namespace tr {
     template <class E> struct CosOperation;
     template <class E> struct SinOperation;
     template <class E> struct ExpOperation;
     template <class E> struct LogOperation;
     template <class E> struct MinusOperation;
-    template <class E> struct Simplify;
     template <class L, class R, class Op> struct BinaryOperation;
-    
-    
     
     template<class T>
     auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os)
@@ -27,7 +24,7 @@ namespace tr {
     }
     
     template<int V> struct IntConstant{
-        double operator()(double inValue) const {
+        double operator()(const std::vector<double>& x) const {
             return V;
         }
         
@@ -36,19 +33,67 @@ namespace tr {
         }
     };
     
-    struct Variable {
-        double operator()(double x) const {
-            return x;
+    template<int N, int M> struct Ratio {
+        double operator()(const std::vector<double>& x) const {
+            return N/(double)M;
         }
         
         void print(std::ostream& os) const {
-            os << "x";
+            os << N << "/" << M;
+        }
+    };
+
+    template <int N, int base = 10>
+    constexpr auto Denom = base * Denom<N / base, base>;
+    template <int base = 10>
+    constexpr auto Denom<0, base> = 1;
+
+    
+    template<int N, int M> struct Real {
+        double operator()(const std::vector<double>& x) const {
+            return N + M / (double)Denom<N>;
+        }
+        
+        void print(std::ostream& os) const {
+            os << N << "." << M;
+        }
+    };
+    
+    template<int DIM>
+    struct Variable {
+        double operator()(const std::vector<double>& x) const {
+            return x[DIM];
+        }
+        
+        void print(std::ostream& os) const {
+            os << "x"<< DIM;
         }
     };
     
     using ZeroConstant = IntConstant<0>;
     using OneConstant = IntConstant<1>;
     
+    
+    template<class E> struct DoubleConstant{
+        double val = 0;
+        E expr;
+        
+        DoubleConstant() {
+            val = expr({});
+        }
+        
+        DoubleConstant(double v) {
+            val = v;
+        }
+        
+        double operator()(const std::vector<double>& x) const {
+            return val;
+        }
+        
+        void print(std::ostream& os) const {
+            os << val;
+        }
+    };
     
     struct Add {
         inline static double apply(double a, double b) {
@@ -99,7 +144,7 @@ namespace tr {
     struct BinaryOperation {
         L left;
         R right;
-        inline double operator()(double x) const {
+        inline double operator()(const std::vector<double>& x) const {
             return Op::apply(left(x), right(x));
         }
         
@@ -109,23 +154,63 @@ namespace tr {
     };
     
     template<class L, class R>
-    inline BinaryOperation<L,R, Add> operator+(const L& l, const R& r) {
+    inline auto operator+(const L& l, const R& r) {
         return BinaryOperation<L,R, Add>{l, r};
     }
     
     template<class L, class R>
-    inline BinaryOperation<L,R, Sub> operator-(const L& l, const R& r) {
+    inline auto operator-(const L& l, const R& r) {
         return BinaryOperation<L,R, Sub>{l, r};
     }
    
     template<class L, class R>
-    inline BinaryOperation<L,R, Mul> operator*(const L& l, const R& r) {
+    inline auto operator*(const L& l, const R& r) {
         return BinaryOperation<L,R, Mul>{l, r};
     }
     
     template<class L, class R>
-    inline BinaryOperation<L,R, Div> operator/(const L& l, const R& r) {
+    inline auto operator/(const L& l, const R& r) {
         return BinaryOperation<L,R, Div>{l, r};
+    }
+    
+    template<class L>
+    inline auto operator+(const L& l, double r) {
+        return BinaryOperation<L,DoubleConstant<double>, Add>{l, r};
+    }
+    
+    template<class L>
+    inline auto operator-(const L& l, double r) {
+        return BinaryOperation<L,DoubleConstant<double>, Sub>{l, r};
+    }
+   
+    template<class L>
+    inline auto operator*(const L& l, double r) {
+        return BinaryOperation<L,DoubleConstant<double>, Mul>{l, r};
+    }
+    
+    template<class L>
+    inline auto operator/(const L& l, double r) {
+        return BinaryOperation<L, DoubleConstant<double>, Div>{l, r};
+    }
+    
+    template<class R>
+    inline auto operator+(double l, const R& r) {
+        return BinaryOperation<DoubleConstant<double>, R, Add>{l, r};
+    }
+    
+    template<class R>
+    inline auto operator-(double l, const R& r) {
+        return BinaryOperation<DoubleConstant<double>, R, Sub>{l, r};
+    }
+    
+    template<class R>
+    inline auto operator*(double l, const R& r) {
+        return BinaryOperation<DoubleConstant<double>, R, Mul>{l, r};
+    }
+    
+    template<class R>
+    inline auto operator/(double l, const R& r) {
+        return BinaryOperation<DoubleConstant<double>, R, Div>{l, r};
     }
     
     template<class L, class R>
@@ -136,7 +221,7 @@ namespace tr {
     template <double(*func)(double) , class E>
     struct UnaryOperation {
         E e;
-        inline double operator()(double x) const {
+        inline double operator()(const std::vector<double>& x) const {
             return func(e(x));
         }
     };
@@ -149,7 +234,7 @@ namespace tr {
             os << "-" << this->e;
         }
         
-        inline double operator()(double x) const {
+        inline double operator()(const std::vector<double>& x) const {
             return -e(x);
         }
         
