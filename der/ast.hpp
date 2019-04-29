@@ -73,28 +73,6 @@ namespace tr {
     using ZeroConstant = IntConstant<0>;
     using OneConstant = IntConstant<1>;
     
-    
-    template<class E> struct DoubleConstant{
-        double val = 0;
-        E expr;
-        
-        DoubleConstant() {
-            val = expr({});
-        }
-        
-        DoubleConstant(double v) {
-            val = v;
-        }
-        
-        double operator()(const std::vector<double>& x) const {
-            return val;
-        }
-        
-        void print(std::ostream& os) const {
-            os << val;
-        }
-    };
-    
     struct Add {
         inline static double apply(double a, double b) {
             return a + b;
@@ -171,46 +149,6 @@ namespace tr {
     template<class L, class R>
     inline auto operator/(const L& l, const R& r) {
         return BinaryOperation<L,R, Div>{l, r};
-    }
-    
-    template<class L>
-    inline auto operator+(const L& l, double r) {
-        return BinaryOperation<L,DoubleConstant<double>, Add>{l, r};
-    }
-    
-    template<class L>
-    inline auto operator-(const L& l, double r) {
-        return BinaryOperation<L,DoubleConstant<double>, Sub>{l, r};
-    }
-   
-    template<class L>
-    inline auto operator*(const L& l, double r) {
-        return BinaryOperation<L,DoubleConstant<double>, Mul>{l, r};
-    }
-    
-    template<class L>
-    inline auto operator/(const L& l, double r) {
-        return BinaryOperation<L, DoubleConstant<double>, Div>{l, r};
-    }
-    
-    template<class R>
-    inline auto operator+(double l, const R& r) {
-        return BinaryOperation<DoubleConstant<double>, R, Add>{l, r};
-    }
-    
-    template<class R>
-    inline auto operator-(double l, const R& r) {
-        return BinaryOperation<DoubleConstant<double>, R, Sub>{l, r};
-    }
-    
-    template<class R>
-    inline auto operator*(double l, const R& r) {
-        return BinaryOperation<DoubleConstant<double>, R, Mul>{l, r};
-    }
-    
-    template<class R>
-    inline auto operator/(double l, const R& r) {
-        return BinaryOperation<DoubleConstant<double>, R, Div>{l, r};
     }
     
     template<class L, class R>

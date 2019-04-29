@@ -8,16 +8,18 @@
 #include "ast.hpp"
 #include "simplify.hpp"
 
+
 namespace tr {
     template <int DIM, class E> struct Der;
+    
     template<int DIM, class E>
     using D = S<typename Der<DIM, E>::Result>;
     
-    template<int DIM, int VAR>
-    struct Der<DIM, Variable<VAR>> {
+    template<int DIM, template<int> class V, int VDIM>
+    struct Der<DIM, V<VDIM> > {
         using Result = ZeroConstant;
     };
-    
+
     template<int DIM>
     struct Der<DIM, Variable<DIM>> {
         using Result = OneConstant;
@@ -28,30 +30,24 @@ namespace tr {
         using Result = ZeroConstant;
     };
     
-    
-    template<int DIM, class E>
-    struct Der<DIM, DoubleConstant<E>> {
-        using Result = ZeroConstant;
-    };
-    
     template<int DIM, class L, class R>
     struct Der<DIM, BinaryOperation<L,R, Add>> {
-        using DL =S<D<DIM, L>>;
-        using DR = S<D<DIM, R>>;
+        using DL =D<DIM, L>;
+        using DR = D<DIM, R>;
         using Result = S<BinaryOperation<DL, DR, Add>>;
     };
     
     template<int DIM, class L, class R>
     struct Der<DIM, BinaryOperation<L,R, Sub>> {
-        using DL = S<D<DIM, L>>;
-        using DR = S<D<DIM, R>>;
+        using DL = D<DIM, L>;
+        using DR = D<DIM, R>;
         using Result = S<BinaryOperation<DL, DR, Sub>>;
     };
     
     template<int DIM, class L, class R>
     struct Der<DIM, BinaryOperation<L,R, Mul>> {
-        using DL = S<D<DIM, L>>;
-        using DR = S<D<DIM, R>>;
+        using DL = D<DIM, L>;
+        using DR = D<DIM, R>;
         using LDR = S<BinaryOperation<L, DR, Mul>>;
         using RDL = S<BinaryOperation<DL, R, Mul>>;
         using Result = S<BinaryOperation<LDR, RDL, Add>>;
@@ -59,8 +55,8 @@ namespace tr {
     
     template<int DIM, class L, class R>
     struct Der<DIM, BinaryOperation<L,R, Div>> {
-        using DL = S<D<DIM, L>>;
-        using DR = S<D<DIM, R>>;
+        using DL = D<DIM, L>;
+        using DR = D<DIM, R>;
         using LDR = S<BinaryOperation<L, DR, Mul>>;
         using RDL = S<BinaryOperation<DL, R, Mul>>;
         using RR = S<BinaryOperation<R, R, Mul>>;
@@ -70,9 +66,10 @@ namespace tr {
     
     template<int DIM, class L, int E>
     struct Der<DIM, BinaryOperation<L,IntConstant<E>, Exp>> {
-        using DL = S<D<DIM, L>>;
-        using EL = BinaryOperation<L,IntConstant<E-1>, Exp>;
-        using Result = S<BinaryOperation<IntConstant<E>, EL, Mul>>;
+        using DL = D<DIM, L>;
+        using EL = BinaryOperation<L, IntConstant<E-1>, Exp>;
+        using DLE = BinaryOperation<DL, IntConstant<E>, Mul>;
+        using Result = S<BinaryOperation<DLE, EL, Mul>>;
     };
     
     template<int DIM, class L, class R>
@@ -84,9 +81,9 @@ namespace tr {
     
     template<int DIM, template<class> class UnOp, class E>
     struct Der<DIM, UnOp<E>> {
-        using DE = S<D<DIM, E>>;
+        using DE = D<DIM, E>;
         using DOP = typename UnOp<E>::Derivative;
-        using Result = S<BinaryOperation<DE, DOP, Mul>>;
+        using Result = BinaryOperation<DE, DOP, Mul>;
     };
     
 

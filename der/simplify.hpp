@@ -20,6 +20,16 @@ namespace tr {
         using Result = S<L>;
     };
     
+    template<int V>
+    struct Simplify<BinaryOperation<IntConstant<V>, ZeroConstant, Add>> {
+        using Result = IntConstant<V>;
+    };
+    
+    template<int V>
+    struct Simplify<BinaryOperation<ZeroConstant, IntConstant<V>, Add>> {
+        using Result = IntConstant<V>;
+    };
+    
     template<class R>
     struct Simplify<BinaryOperation<ZeroConstant, R, Add>> {
         using Result = S<R>;
@@ -85,6 +95,56 @@ namespace tr {
         using Result = S<R>;
     };
     
+    template<int L>
+    struct Simplify<BinaryOperation<IntConstant<L>, OneConstant, Mul>> {
+        using Result = IntConstant<L>;
+    };
+    
+    template<int R>
+    struct Simplify<BinaryOperation<OneConstant, IntConstant<R>, Mul>> {
+        using Result = IntConstant<R>;
+    };
+    
+    template<int L>
+    struct Simplify<BinaryOperation<IntConstant<L>, ZeroConstant, Mul>> {
+        using Result = ZeroConstant;
+    };
+    
+    template<int R>
+    struct Simplify<BinaryOperation<ZeroConstant, IntConstant<R>, Mul>> {
+        using Result = ZeroConstant;
+    };
+    
+    template<>
+    struct Simplify<BinaryOperation<ZeroConstant, OneConstant, Mul>> {
+        using Result = ZeroConstant;
+    };
+    
+    template<>
+    struct Simplify<BinaryOperation<OneConstant, ZeroConstant, Mul>> {
+        using Result = ZeroConstant;
+    };
+
+    template<int L, int R>
+    struct Simplify<BinaryOperation<IntConstant<L>, IntConstant<R>, Mul>> {
+        using Result = IntConstant<L * R>;
+    };
+    
+    template<int L, int R>
+    struct Simplify<BinaryOperation<IntConstant<L>, IntConstant<R>, Div>> {
+        using Result = IntConstant<L / R>;
+    };
+    
+    template<int L, int R>
+    struct Simplify<BinaryOperation<IntConstant<L>, IntConstant<R>, Add>> {
+        using Result = IntConstant<L + R>;
+    };
+    
+    template<int L, int R>
+    struct Simplify<BinaryOperation<IntConstant<L>, IntConstant<R>, Sub>> {
+        using Result = IntConstant<L - R>;
+    };
+
     template<>
     struct Simplify<BinaryOperation<OneConstant, OneConstant, Mul>> {
         using Result = OneConstant;
@@ -125,11 +185,6 @@ namespace tr {
         using Result = S<BinaryOperation<L, R, Mul>>;
     };
     
-    template<class L, class R, class Op>
-    struct Simplify<BinaryOperation<DoubleConstant<L>, DoubleConstant<R>, Op>> {
-        using Result = DoubleConstant<S<BinaryOperation<L, R, Op>>>;
-    };
-    
     template<class L, class R>
     struct Simplify<BinaryOperation<MinusOperation<L>, MinusOperation<R>, Add>> {
         using Result = MinusOperation<S<BinaryOperation<L, R, Add>>>;
@@ -168,6 +223,11 @@ namespace tr {
     template<class L>
     struct Simplify<BinaryOperation<ZeroConstant, L, Exp>> {
         using Result = ZeroConstant;
+    };
+    
+    template<class R, int V1, int V2>
+    struct Simplify<BinaryOperation<IntConstant<V1>, BinaryOperation<IntConstant<V2>, R, Mul>, Mul>> {
+        using Result = S<BinaryOperation<IntConstant<V1 * V2>, R, Mul>>;
     };
     
     /*template<class L1, class R1, class L2, class R2>
