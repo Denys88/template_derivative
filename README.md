@@ -1,4 +1,5 @@
 # С++ Template Compile-Time Differentiation
+* version 0.01a
 
 Test:
 
@@ -24,3 +25,9 @@ Test:
     std::cout<< dfdx0 << std::endl;
     std::cout<< dfdx1 << std::endl;
 ```
+
+# TODO
+[] More simplification rules for all default
+[] Make everything we can constexpr
+[] More compilcated simplification rules
+[] Integration with popular math libraries
