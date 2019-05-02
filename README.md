@@ -27,7 +27,7 @@ Test:
 ```
 
 # TODO
-[] More simplification rules for all default
-[] Make everything we can constexpr
-[] More compilcated simplification rules
-[] Integration with popular math libraries
+* More simplification rules for all default
+* Make everything we can constexpr
+* More compilcated simplification rules
+* Integration with popular math libraries
